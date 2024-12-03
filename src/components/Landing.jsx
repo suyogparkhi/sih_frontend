@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AudioWaveform, Play, PauseCircle, Settings2 } from 'lucide-react';
+import Footer from './Footer';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -149,7 +150,7 @@ const LandingPage = () => {
       style={{ backgroundSize: "200% 200%", backgroundPosition: "0% 0%" }}
     >
 
-      <nav className="flex justify-between items-center p-6 z-10 relative">
+      {/* <nav className="flex justify-between items-center p-6 z-10 relative">
         <div className="flex items-center space-x-2">
           <AudioWaveform className="h-8 w-8 text-cyan-600" />
           <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-blue-400">
@@ -161,7 +162,7 @@ const LandingPage = () => {
           <button className="hover:text-cyan-600 transition-colors">Documentation</button>
           <button className="hover:text-cyan-600 transition-colors">Contact</button>
         </div>
-      </nav>
+      </nav> */}
 
 
       <div className="container mx-auto px-6 pt-20 pb-24 relative z-10">
@@ -252,7 +253,10 @@ const LandingPage = () => {
       <div className="glow-circle absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-blue-400/20 rounded-full blur-[100px]"></div>
       <div className="glow-circle absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan-300/20 rounded-full blur-[80px]"></div>
     </div>
+<Footer />
+
     </div>
+
   );
 };
 
