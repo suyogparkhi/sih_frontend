@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AudioWaveform, Play, PauseCircle, Settings2 } from 'lucide-react';
 import Footer from './Footer';
+import WaveVisualisation from './WaveVisualisation';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -69,27 +70,46 @@ const LandingPage = () => {
       }
     
      
-      if (featuresRef.current) {
-        const features = featuresRef.current.querySelectorAll('.feature-item');
+      // if (featuresRef.current) {
+      //   const features = featuresRef.current.querySelectorAll('.feature-item');
   
-        gsap.from('.feature', {
-          opacity: 0,
-          y: 50,
-          duration: 1,
-          stagger: 0.2,
-          scrollTrigger: {
-            trigger: featuresRef.current,
-            start: 'top 90%',
-            end: 'bottom 30%',
-            toggleActions: 'play none none none', 
+      //   gsap.from('.feature', {
+      //     opacity: 0,
+      //     y: 50,
+      //     duration: 1,
+      //     stagger: 0.2,
+      //     scrollTrigger: {
+      //       trigger: featuresRef.current,
+      //       start: 'top 90%',
+      //       end: 'bottom 30%',
+      //       toggleActions: 'play none none none', 
     
             
-          },
+      //     },
+      //   });
+      // } else {
+      //   console.error("featuresRef is not properly assigned.");
+      // }
+      if (featuresRef.current) {
+        const features = featuresRef.current.querySelectorAll('.feature-item');
+        features.forEach(feature => {
+          gsap.from(feature, {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            stagger: 0.2,
+            scrollTrigger: {
+              trigger: feature,
+              start: 'top 90%',
+              end: 'bottom 30%',
+              toggleActions: 'play none none none', 
+            },
+          });
         });
       } else {
         console.error("featuresRef is not properly assigned.");
       }
-
+      
 
       const glowElements = glowRef.current.querySelectorAll('.glow-circle');
 
@@ -188,6 +208,7 @@ const LandingPage = () => {
             </button>
           </div>
         </div>
+        <WaveVisualisation></WaveVisualisation>
 
         {/* Animated Wave */}
         <div className="mt-16 flex justify-center">
