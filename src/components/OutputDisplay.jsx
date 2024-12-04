@@ -4,7 +4,9 @@ import Chart from 'chart.js/auto'
 export default function OutputDisplay({ accuracy, confidenceScore, chartData }) {
   const chartRef = useRef(null)
   const chartInstance = useRef(null)
+  
 
+  
   useEffect(() => {
     if (chartRef.current) {
       if (chartInstance.current) {
@@ -12,33 +14,55 @@ export default function OutputDisplay({ accuracy, confidenceScore, chartData }) 
       }
 
       const ctx = chartRef.current.getContext('2d')
+      
+      
+
       chartInstance.current = new Chart(ctx, {
-        type: 'bar',
+        type: 'scatter',
         data: {
-          labels: chartData.map(item => item.name),
-          datasets: [{
-            label: 'Performance',
-            data: chartData.map(item => item.value),
-            backgroundColor: '#4785FF',
-            borderColor: '#2C5282',
-            borderWidth: 1
-          }]
+          datasets: [
+            {
+              label: 'hello_google',
+              data: chartData.filter(d => d.class === 'hello_google'),
+              backgroundColor: '#4A90E2',
+              pointRadius: 6
+            },
+            {
+              label: 'noise',
+              data: chartData.filter(d => d.class === 'noise'),
+              backgroundColor: '#E25B4A',
+              pointRadius: 6
+            },
+            {
+              label: 'unknown',
+              data: chartData.filter(d => d.class === 'unknown'),
+              backgroundColor: '#50C878',
+              pointRadius: 6
+            }
+          ]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           scales: {
+            x: {
+              grid: {
+                color: '#f0f0f0'
+              }
+            },
             y: {
-              beginAtZero: true
+              grid: {
+                color: '#f0f0f0'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top'
             }
           }
         }
       })
-    }
-
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy()
-      }
     }
   }, [chartData])
 
@@ -57,10 +81,14 @@ export default function OutputDisplay({ accuracy, confidenceScore, chartData }) 
               <p className="text-sm text-gray-500">Confidence Score</p>
               <p className="text-2xl font-bold text-[#4785FF]">{confidenceScore}</p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500">Confusion Metrics</p>
+              <p className="text-2xl font-bold text-[#4785FF]">{confidenceScore}</p>
+            </div>
           </div>
         </div>
         <div>
-          <h3 className="text-lg font-medium mb-4">Performance Chart</h3>
+          <h3 className="text-lg font-medium mb-4">Performance Visualiser</h3>
           <div className="w-full h-64">
             <canvas ref={chartRef}></canvas>
           </div>

@@ -16,6 +16,18 @@ export default function TestModel() {
   const [isLoading, setIsLoading] = useState(false)
   const [modelOutput, setModelOutput] = useState(null)
 
+  const generateDummyData = () => {
+    const data = []
+    for (let i = 0; i < 200; i++) {
+      data.push({
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        class: ['hello_google', 'noise', 'unknown'][Math.floor(Math.random() * 3)]
+      })
+    }
+    return data
+  }
+
   const handleFileChange = (event) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files).map((file) => ({
@@ -45,6 +57,7 @@ export default function TestModel() {
     e.preventDefault()
   }
 
+
   const handleUpload = () => {
     setIsLoading(true)
     let uploadProgress = 0
@@ -54,15 +67,11 @@ export default function TestModel() {
       if (uploadProgress >= 100) {
         clearInterval(interval)
         setIsLoading(false)
+        const dummydata=generateDummyData();
         setModelOutput({
           accuracy: 85,
           confidenceScore: 0.92,
-          chartData: [
-            { name: 'Category A', value: 400 },
-            { name: 'Category B', value: 300 },
-            { name: 'Category C', value: 200 },
-            { name: 'Category D', value: 100 },
-          ]
+          chartData:dummydata
         })
         setActiveTab('results')
       }
@@ -109,28 +118,19 @@ export default function TestModel() {
           onClick={() => setActiveTab('upload')}
           className={`px-6 py-2 rounded-md transition-colors ${
             activeTab === 'upload'
-              ? 'bg-[#000000] text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            ? 'bg-[#3D9CBF]/20 text-[#3D9CBF]' // Darker shade of blue for active state
+            : 'bg-gray-200 text-gray-700 hover:bg-[#3D9CBF]/20 hover:text-[#3D9CBF]' // Slightly darker gray for inactive state
           }`}
         >
           Upload
-        </button>
-        <button
-          onClick={() => setActiveTab('datasets')}
-          className={`px-6 py-2 rounded-md transition-colors ${
-            activeTab === 'datasets'
-              ? 'bg-[#000000] text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          Datasets
-        </button>
+         </button>
+        
         <button
           onClick={() => setActiveTab('results')}
           className={`px-6 py-2 rounded-md transition-colors ${
             activeTab === 'results'
-              ? 'bg-[#000000] text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            ? 'bg-[#3D9CBF]/20 text-[#3D9CBF]' // Darker shade of blue for active state
+            : 'bg-gray-200 text-gray-700 hover:bg-[#3D9CBF]/20 hover:text-[#3D9CBF]' // Slightly darker gray for inactive state
           }`}
         >
           Results
@@ -146,7 +146,7 @@ export default function TestModel() {
           <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
-            className="border-2 border-dashed border-gray-200 rounded-lg p-8 mb-6 text-center"
+            className="border-2 border-dashed border-cyan-200 rounded-lg p-8 mb-6 text-center"
           >
             <input
               type="file"
@@ -160,11 +160,11 @@ export default function TestModel() {
               htmlFor="file-upload"
               className="cursor-pointer flex flex-col items-center gap-4"
             >
-              <Upload className="h-12 w-12 text-gray-400" />
+              <Upload className="h-12 w-12 text-cyan-400" />
               <div>
                 <p className="text-lg font-medium text-gray-700">Click to upload</p>
                 <p className="text-gray-500">or drag and drop</p>
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-sm text-gray-500 mt-2">
                   WAV, MP3 or OGG (MAX. 10MB per file)
                 </p>
               </div>
@@ -179,7 +179,12 @@ export default function TestModel() {
               </p>
               <button
                 onClick={handleUpload}
-                className="bg-[#4785FF] text-white px-6 py-2 rounded-md hover:bg-[#4785FF]/90 transition-colors"
+                className={`bg-gradient-to-r from-cyan-400 to-blue-300 
+                  hover:from-cyan-500 hover:to-blue-400 
+                  text-white px-8 py-3 rounded-lg font-semibold 
+                  transition-all duration-300 flex items-center gap-2 
+                  shadow-lg hover:shadow-xl transform hover:-translate-y-1
+                  disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 Upload
               </button>
@@ -191,7 +196,7 @@ export default function TestModel() {
             <div className="space-y-2">
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div
-                  className="bg-[#4785FF] h-2 rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-cyan-400 to-blue-300 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -201,40 +206,7 @@ export default function TestModel() {
         </div>
       )}
 
-      {/* Datasets Section */}
-      {activeTab === 'datasets' && (
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Datasets</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-medium mb-4">Training Dataset</h3>
-              <ul className="space-y-2">
-                {files.filter((file) => file.type === 'training').map((file) => (
-                  <li key={file.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-md">
-                    <span className="text-gray-700">{file.name}</span>
-                    <button onClick={() => handleAudioPlay(file)} className="text-[#4785FF] hover:text-[#4785FF]/80">
-                      <Play className="w-5 h-5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium mb-4">Testing Dataset</h3>
-              <ul className="space-y-2">
-                {files.filter((file) => file.type === 'testing').map((file) => (
-                  <li key={file.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-md">
-                    <span className="text-gray-700">{file.name}</span>
-                    <button onClick={() => handleAudioPlay(file)} className="text-[#4785FF] hover:text-[#4785FF]/80">
-                      <Play className="w-5 h-5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
+      
 
       {/* Results Section */}
       {activeTab === 'results' && (
