@@ -1,25 +1,74 @@
 import React, { useState } from 'react';
-import { Upload, Play, AlertCircle, CheckCircle } from 'lucide-react'; // Import CheckCircle for success
-import LoadingPopup from './LoadingPopup'; // Import the LoadingPopup component
+import { Upload, Play, AlertCircle, CheckCircle } from 'lucide-react';
+import ModelPerformance from './ModelPerformance';
+//import LoadingPopup from './LoadingPopup'; // Import your LoadingPopup component
 
 const Train = () => {
   const [files, setFiles] = useState([]);
+  const [trainingOutput, setTrainingOutput] = useState([]);
   const [isTraining, setIsTraining] = useState(false);
-  const [isTrainingCompleted, setIsTrainingCompleted] = useState(false); // Track training completion
+  const [isTrainingCompleted, setIsTrainingCompleted] = useState(false);
+  const [modelMetrics, setModelMetrics] = useState(null); // Store model metrics
 
   const handleFileUpload = (event) => {
     const uploadedFiles = Array.from(event.target.files);
     setFiles((prev) => [...prev, ...uploadedFiles]);
   };
 
-  const handleTrain = () => {
-    setIsTraining(true);
+  const simulateTrainingLogs = async () => {
+    const logs = [
+      'Initializing training...',
+      'Loading dataset...',
+      'Starting training process...',
+      'Epoch 1/30: loss: 0.45 - accuracy: 0.85',
+      'Epoch 15/30: loss: 0.25 - accuracy: 0.92',
+      'Epoch 30/30: loss: 0.18 - accuracy: 0.976',
+      'Training complete!',
+    ];
 
-    // Simulate training process
+    for (const log of logs) {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate log generation delay
+      setTrainingOutput((prev) => [...prev, log]);
+    }
+  };
+
+  const handleTrain = async () => {
+    setIsTraining(true);
+    setTrainingOutput([]); // Clear logs before new training
+    setModelMetrics(null); // Clear metrics
+
+    // Simulate log output
+    await simulateTrainingLogs();
+
+    // Simulate model metrics (replace with actual logic)
+    const simulatedMetrics = {
+      accuracy: 97.6,
+      loss: 0.18,
+      confusionMatrix: {
+        hello_google: { hello_google: 95, noise: 2, unknown: 3 },
+        noise: { hello_google: 1, noise: 98, unknown: 1 },
+        unknown: { hello_google: 0, noise: 3, unknown: 97 },
+      },
+      metrics: {
+        rocCurve: 0.98,
+        precision: 0.96,
+        recall: 0.95,
+        f1Score: 0.96,
+      },
+      performance: {
+        inferenceTime: '0.5ms',
+        ramUsage: '120MB',
+        flashUsage: '1.5MB',
+      },
+    };
+
+    setModelMetrics(simulatedMetrics);
+
+    // Simulate slight delay before showing popup
     setTimeout(() => {
       setIsTraining(false);
-      setIsTrainingCompleted(true); // Mark training as completed
-    }, 3000); // Replace with actual training logic
+      setIsTrainingCompleted(true); // Show success popup
+    }, 1500);
   };
 
   const handleClosePopup = () => {
@@ -87,14 +136,12 @@ const Train = () => {
           <button
             onClick={handleTrain}
             disabled={files.length === 0 || isTraining}
-            className={`
-              bg-gradient-to-r from-cyan-400 to-blue-300 
+            className={`bg-gradient-to-r from-cyan-400 to-blue-300 
               hover:from-cyan-500 hover:to-blue-400 
               text-white px-8 py-3 rounded-lg font-semibold 
               transition-all duration-300 flex items-center gap-2 
               shadow-lg hover:shadow-xl transform hover:-translate-y-1
-              disabled:opacity-50 disabled:cursor-not-allowed
-            `}
+              disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isTraining ? (
               <>
@@ -109,25 +156,36 @@ const Train = () => {
             )}
           </button>
         </div>
+
+        <div className="space-y-8 mt-8">
+          {/* Training Output Console */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Training Output</h2>
+            <div className="bg-gray-900 text-green-400 p-4 rounded-md h-48 overflow-y-auto font-mono text-sm">
+              {trainingOutput.map((log, index) => (
+                <div key={index}>{log}</div>
+              ))}
+            </div>
+          </div>
+
+          {/* Metrics Card */}
+
+          {modelMetrics && <ModelPerformance modelMetrics={modelMetrics} />}
+          
+        </div>
       </div>
 
-      {/* Show Loading Popup During Training */}
-      {isTraining && (
-        <LoadingPopup
-          message="Training in progress..."
-        />
-      )}
-
-      {/* Show Success Popup After Training */}
+      {/* Show Loading Popup After Training */}
       {isTrainingCompleted && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mb-4 mx-auto" />
-            <h3 className="text-xl font-semibold text-green-600">Training Completed!</h3>
+            <h3 className="text-xl font-semibold text-green-600">
+              Training Completed!
+            </h3>
             <p className="text-lg text-gray-700 mt-2">
               The training process has been successfully completed.
             </p>
-            {/* Close Button */}
             <button
               onClick={handleClosePopup}
               className="mt-4 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold"
@@ -142,3 +200,4 @@ const Train = () => {
 };
 
 export default Train;
+
