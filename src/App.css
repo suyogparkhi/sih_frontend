@@ -36,3 +36,14 @@
     transform: rotate(360deg);
   }
 }
+
+.wave-wrapper {
+  position: sticky;
+  top: 0; /* Or another value depending on layout */
+  z-index: 0; /* Ensure it's behind other content */
+}
+
+.wave-canvas {
+  position: absolute;
+  transform: translateY(calc(var(--scroll-progress) * 400px));
+}
