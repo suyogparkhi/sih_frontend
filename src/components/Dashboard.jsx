@@ -1,21 +1,19 @@
-
-
-import { useState } from 'react'
-import { ChevronLeft, ChevronRight, Activity, FlaskConical } from 'lucide-react'
+import { useState, useContext } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import TestModel from './TestModel'
 import Train from './Train'
+import { ThemeContext } from '../context/ThemeProvider'
 
 // Placeholder Train component
 
-
 // Placeholder Dashboard component
-const Welcome = () => (
+const Welcome = ({darkMode}) => (
   <div className="p-8">
-    <div className="max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">
+    <div className={`max-w-7xl mx-auto`}>
+      <h1 className={`text-3xl font-bold  ${darkMode ? 'text-white':'text-gray-900'} mb-8`}>
         Welcome to Dashboard
       </h1>
-      <p className="text-gray-600">
+      <p className={`${darkMode ? 'text-gray-200' : 'text-gray-600'}`}>
         Select an option from the sidebar to get started.
       </p>
     </div>
@@ -25,6 +23,7 @@ const Welcome = () => (
 export default function Dashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [activeComponent, setActiveComponent] = useState('welcome') // Track the active component
+  const { darkMode } = useContext(ThemeContext);
 
   const renderContent = () => {
     switch (activeComponent) {
@@ -32,59 +31,60 @@ export default function Dashboard() {
         return <TestModel />
       case 'train':
         return <Train />
-
       default:
-        return <Welcome />
+        return <Welcome darkMode={darkMode} />
     }
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-white to-[#EFF8FF]">
+    <div className={`flex h-screen ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-white to-[#EFF8FF]'}`}>
       {/* Sidebar */}
       <div
-        className={`relative transition-all duration-300 ease-in-out bg-white border-r border-gray-100 ${
+        className={`relative transition-all duration-300 ease-in-out border-r ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} ${
           isCollapsed ? 'w-16' : 'w-64'
         }`}
       >
         <button
-          className="absolute -right-3 top-6 z-10 rounded-full border shadow-sm bg-white p-1 hover:bg-gray-100"
+          className={`absolute -right-3 top-6 z-10 rounded-full border shadow-sm p-1 ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           {isCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className={`h-4 w-4 ${darkMode ? 'text-white' : 'text-gray-800'}`} />
           ) : (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className={`h-4 w-4 ${darkMode ? 'text-white' : 'text-gray-800'}`} />
           )}
         </button>
 
         <div className="p-4">
           <div className="flex items-center justify-center h-12">
             {!isCollapsed && (
-              <span className="text-xl font-semibold text-[#61DAFB]">Dashboard</span>
+              <span className={`text-xl font-semibold ${darkMode ? 'text-[#61DAFB]' : 'text-[#61DAFB]'}`}>Dashboard</span>
             )}
           </div>
 
           <nav className="mt-8 space-y-2">
             <button
-              onClick={() => setActiveComponent('test')}
-              className="w-full text-left flex items-center gap-3 rounded-lg px-3 py-2 text-gray-700 transition-all hover:bg-[#61DAFB]/10 hover:text-[#61DAFB]"
+              onClick={() => setActiveComponent('train')}
+              className={`w-full text-left flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${darkMode ? 'text-white hover:bg-[#61DAFB]/10 hover:text-[#61DAFB]' : 'text-gray-700 hover:bg-[#61DAFB]/10 hover:text-[#61DAFB]'}`}
             >
-                <img src="/assets/page-optimization.gif" className='w-[20%] text-left' ></img>
-              {!isCollapsed && <span>Test Model</span>}
+              <img src="/assets/train.gif" className="w-[20%] text-left" alt="" />
+              {!isCollapsed && <span className={`text-xl ${darkMode ? 'text-white' : 'text-gray-800'}`}>Train Model</span>}
             </button>
             <button
-              onClick={() => setActiveComponent('train')}
-              className="w-full text-left flex items-center gap-3 rounded-lg px-3 py-2 text-gray-700 transition-all hover:bg-[#61DAFB]/10 hover:text-[#61DAFB]"
+              onClick={() => setActiveComponent('test')}
+              className={`w-full text-left flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${darkMode ? 'text-white hover:bg-[#61DAFB]/10 hover:text-[#61DAFB]' : 'text-gray-700 hover:bg-[#61DAFB]/10 hover:text-[#61DAFB]'}`}
             >
-              <img src="/assets/startup.gif" className='w-[20%] text-left' ></img>
-              {!isCollapsed && <span>Train Model</span>}
+              <img src="/assets/test-model.gif" className="w-[20%] text-left" alt="" />
+              {!isCollapsed && <span className={`text-xl ${darkMode ? 'text-white' : 'text-gray-800'}`}>Test Model</span>}
             </button>
           </nav>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">{renderContent()}</div>
+      <div className={`flex-1 overflow-auto ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+        {renderContent()}
+      </div>
     </div>
   )
 }

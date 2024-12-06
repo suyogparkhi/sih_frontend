@@ -1,9 +1,10 @@
-import React from 'react';
+import React,{useContext} from 'react';
 import { Link } from 'react-router-dom';
 import { FaTwitter, FaFacebookF, FaInstagram, FaGithub } from 'react-icons/fa';
-
+import { ThemeContext } from '../context/ThemeProvider';
 
 const Footer = () => {
+  const{darkMode}=useContext(ThemeContext);
   return (
     <div div className='flex flex-col'>
     <footer className="flex flex-col items-center justify-center py-8 bg-transparent mt-40">
@@ -56,12 +57,12 @@ const Footer = () => {
       </div>
       
     </footer>
-    <hr className="w-[900px] mx-auto mb-5 border-t-1 border-black " />
+    <hr className={`w-[900px] mx-auto mb-5 border-t-1 border-black ${darkMode?"border-white text-white":"border-black text-black "}`} />
         <div className="rights-bottom flex m-auto w-[700px] gap-40 mb-10">
-          <p className="text-md text-black justify-start">© 2024 FSLKWS. All rights reserved</p>
+          <p className="text-md justify-start">© 2024 FSLKWS. All rights reserved</p>
           <div className="flex privacy-div justify-end gap-[20px]">
-            <a href="#" className="text-md text-black">Privacy Policy</a>
-            <a href="#" className="text-md text-black">Terms & Conditions</a>
+            <a href="#" className="text-md ">Privacy Policy</a>
+            <a href="#" className="text-md ">Terms & Conditions</a>
           </div>
         </div>
   </div>
