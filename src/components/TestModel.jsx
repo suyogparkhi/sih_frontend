@@ -1,9 +1,10 @@
-import React, { useState, useRef, useContext } from 'react'
+import React, { useState, useRef, useContext, useEffect } from 'react'
 import { Upload, Play, Pause, SkipForward, SkipBack } from 'lucide-react'
 import LoadingPopup from './LoadingPopup'
 import OutputDisplay from './OutputDisplay'
 import SoundVisualizer from './SoundVisualizer'
 import { ThemeContext } from '../context/ThemeProvider'
+import { api } from '../services/api'
 
 export default function TestModel() {
   const [files, setFiles] = useState([])
@@ -33,8 +34,9 @@ export default function TestModel() {
       const newFiles = Array.from(event.target.files).map((file) => ({
         id: Math.random().toString(36).substr(2, 9),
         name: file.name,
-        type: Math.random() > 0.5 ? 'training' : 'testing',
-        url: URL.createObjectURL(file)
+        type: file.type || 'audio/wav',
+        url: URL.createObjectURL(file),
+        file: file  // Store the actual File object
       }))
       setFiles([...files, ...newFiles])
     }
@@ -46,8 +48,9 @@ export default function TestModel() {
       const newFiles = Array.from(e.dataTransfer.files).map((file) => ({
         id: Math.random().toString(36).substr(2, 9),
         name: file.name,
-        type: Math.random() > 0.5 ? 'training' : 'testing',
-        url: URL.createObjectURL(file)
+        type: file.type || 'audio/wav',
+        url: URL.createObjectURL(file),
+        file: file  // Store the actual File object
       }))
       setFiles([...files, ...newFiles])
     }
@@ -57,25 +60,28 @@ export default function TestModel() {
     e.preventDefault()
   }
 
-
-  const handleUpload = () => {
+  const handleUpload = async () => {
     setIsLoading(true)
-    let uploadProgress = 0
-    const interval = setInterval(() => {
-      uploadProgress += 10
-      setProgress(uploadProgress)
-      if (uploadProgress >= 100) {
-        clearInterval(interval)
-        setIsLoading(false)
-        const dummydata=generateDummyData();
+    try {
+      for (const file of files) {
+        const audioFile = file.file;  // This is the actual File object
+        
+        const result = await api.detectKeyword(audioFile)
+        console.log('Detection result:', result);  // Debug log
+        
         setModelOutput({
-          accuracy: 85,
-          confidenceScore: 0.92,
-          chartData:dummydata
+          accuracy: 100,  // Not used currently
+          confidenceScore: result.confidence,
+          detectedKeyword: result.detected_keyword,
+          status: result.status
         })
-        setActiveTab('results')
       }
-    }, 500)
+    } catch (error) {
+      console.error('Error testing audio:', error)
+    } finally {
+      setIsLoading(false)
+      setActiveTab('results')
+    }
   }
 
   const handleAudioPlay = (file) => {
@@ -108,151 +114,20 @@ export default function TestModel() {
     }
   }
 
+  useEffect(() => {
+    const loadKeywords = async () => {
+      try {
+        const { keywords } = await api.listKeywords()
+        localStorage.setItem('keywords', JSON.stringify(keywords))
+      } catch (error) {
+        console.error('Error loading keywords:', error)
+      }
+    }
+
+    loadKeywords()
+  }, [])
+
   return (
-    // <div className="max-w-4xl mx-auto p-8">
-    //   <h1 className={`text-4xl font-bold mb-8 ${darkMode ?'text-white':'text-gray-900'}`}>Testing</h1>
-      
-    //   {/* Tabs */}
-    //   <div className="flex gap-4 mb-8">
-    //     <button
-    //       onClick={() => setActiveTab('upload')}
-    //       className={`px-6 py-2 rounded-md transition-colors ${
-    //         activeTab === 'upload'
-    //         ? 'bg-[#3D9CBF]/20 text-[#3D9CBF]' // Darker shade of blue for active state
-    //         : 'bg-gray-200 text-gray-700 hover:bg-[#3D9CBF]/20 hover:text-[#3D9CBF]' // Slightly darker gray for inactive state
-    //       }`}
-    //     >
-    //       Upload
-    //      </button>
-        
-    //     <button
-    //       onClick={() => setActiveTab('results')}
-    //       className={`px-6 py-2 rounded-md transition-colors ${
-    //         activeTab === 'results'
-    //         ? 'bg-[#3D9CBF]/20 text-[#3D9CBF]' // Darker shade of blue for active state
-    //         : 'bg-gray-200 text-gray-700 hover:bg-[#3D9CBF]/20 hover:text-[#3D9CBF]' // Slightly darker gray for inactive state
-    //       }`}
-    //     >
-    //       Results
-    //     </button>
-    //   </div>
-
-    //   {/* Upload Section */}
-    //   {activeTab === 'upload' && (
-    //     <div className="bg-white rounded-lg shadow-sm p-8">
-    //       <h2 className="text-2xl font-semibold text-gray-900 mb-6">Upload Audio Files</h2>
-          
-    //       {/* Upload Area */}
-    //       <div
-    //         onDrop={handleDrop}
-    //         onDragOver={handleDragOver}
-    //         className="border-2 border-dashed border-cyan-200 rounded-lg p-8 mb-6 text-center"
-    //       >
-    //         <input
-    //           type="file"
-    //           id="file-upload"
-    //           className="hidden"
-    //           multiple
-    //           accept=".wav,.mp3,.ogg"
-    //           onChange={handleFileChange}
-    //         />
-    //         <label
-    //           htmlFor="file-upload"
-    //           className="cursor-pointer flex flex-col items-center gap-4"
-    //         >
-    //           <Upload className="h-12 w-12 text-cyan-400" />
-    //           <div>
-    //             <p className="text-lg font-medium text-gray-700">Click to upload</p>
-    //             <p className="text-gray-500">or drag and drop</p>
-    //             <p className="text-sm text-gray-500 mt-2">
-    //               WAV, MP3 or OGG (MAX. 10MB per file)
-    //             </p>
-    //           </div>
-    //         </label>
-    //       </div>
-
-    //       {/* Selected Files */}
-    //       {files.length > 0 && (
-    //         <div className="mb-6">
-    //           <p className="text-sm text-gray-600 mb-4">
-    //             {files.length} file(s) selected
-    //           </p>
-    //           <button
-    //             onClick={handleUpload}
-    //             className={`bg-gradient-to-r from-cyan-400 to-blue-300 
-    //               hover:from-cyan-500 hover:to-blue-400 
-    //               text-white px-8 py-3 rounded-lg font-semibold 
-    //               transition-all duration-300 flex items-center gap-2 
-    //               shadow-lg hover:shadow-xl transform hover:-translate-y-1
-    //               disabled:opacity-50 disabled:cursor-not-allowed`}
-    //           >
-    //             Upload
-    //           </button>
-    //         </div>
-    //       )}
-
-    //       {/* Upload Progress */}
-    //       {progress > 0 && (
-    //         <div className="space-y-2">
-    //           <div className="w-full bg-gray-100 rounded-full h-2">
-    //             <div
-    //               className="bg-gradient-to-r from-cyan-400 to-blue-300 h-2 rounded-full transition-all duration-300"
-    //               style={{ width: `${progress}%` }}
-    //             />
-    //           </div>
-    //           <p className="text-sm text-gray-600">{progress}% complete</p>
-    //         </div>
-    //       )}
-    //     </div>
-    //   )}
-
-      
-
-    //   {/* Results Section */}
-    //   {activeTab === 'results' && (
-    //     <>
-    //       {modelOutput && (
-    //         <>
-    //           <OutputDisplay
-    //             accuracy={modelOutput.accuracy}
-    //             confidenceScore={modelOutput.confidenceScore}
-    //             chartData={modelOutput.chartData}
-    //           />
-    //           {currentAudio && (
-    //             <SoundVisualizer audioUrl={currentAudio.url} />
-    //           )}
-    //         </>
-    //       )}
-    //     </>
-    //   )}
-
-    //   {isLoading &&  <LoadingPopup
-    //       message="Testing in progress..."
-
-    //     />}
-
-    //   <audio ref={audioRef} className="hidden" />
-
-    //   {currentAudio && (
-    //     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-    //       <div className="flex items-center justify-between max-w-4xl mx-auto">
-    //         <div className="flex items-center">
-    //           <button onClick={() => handleSkip('backward')} className="p-2 text-gray-600 hover:text-[#4785FF]">
-    //             <SkipBack className="w-6 h-6" />
-    //           </button>
-    //           <button onClick={togglePlayPause} className="p-2 text-gray-600 hover:text-[#4785FF] mx-2">
-    //             {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-    //           </button>
-    //           <button onClick={() => handleSkip('forward')} className="p-2 text-gray-600 hover:text-[#4785FF]">
-    //             <SkipForward className="w-6 h-6" />
-    //           </button>
-    //         </div>
-    //         <div className="text-gray-700">{currentAudio.name}</div>
-    //       </div>
-    //     </div>
-    //   )}
-    // </div>
-
     <div className="max-w-4xl mx-auto p-8">
       <h1 className={`text-4xl font-bold mb-8 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
         Testing
@@ -390,7 +265,8 @@ export default function TestModel() {
           <OutputDisplay
             accuracy={modelOutput.accuracy}
             confidenceScore={modelOutput.confidenceScore}
-            chartData={modelOutput.chartData}
+            detectedKeyword={modelOutput.detectedKeyword}
+            status={modelOutput.status}
             darkMode={darkMode}
           />
           {currentAudio && <SoundVisualizer audioUrl={currentAudio.url} />}

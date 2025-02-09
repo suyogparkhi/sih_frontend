@@ -2,6 +2,7 @@ import React, { useState ,useContext} from 'react';
 import { Upload, Play, AlertCircle, CheckCircle } from 'lucide-react';
 import ModelPerformance from './ModelPerformance';
 import {ThemeContext} from "../context/ThemeProvider"
+import { api } from '../services/api';
 //import LoadingPopup from './LoadingPopup'; // Import your LoadingPopup component
 
 const Train = () => {
@@ -13,7 +14,11 @@ const Train = () => {
   const {darkMode}=useContext(ThemeContext);
 
   const handleFileUpload = (event) => {
-    const uploadedFiles = Array.from(event.target.files);
+    const uploadedFiles = Array.from(event.target.files).map(file => ({
+        name: file.name,
+        type: file.type || 'audio/wav',
+        file: file  // Store the actual file object
+    }));
     setFiles((prev) => [...prev, ...uploadedFiles]);
   };
 
@@ -36,41 +41,37 @@ const Train = () => {
 
   const handleTrain = async () => {
     setIsTraining(true);
-    setTrainingOutput([]); // Clear logs before new training
-    setModelMetrics(null); // Clear metrics
+    setTrainingOutput([]);
+    setModelMetrics(null);
 
-    // Simulate log output
-    await simulateTrainingLogs();
+    try {
+        // Add each file as a keyword
+        for (const file of files) {
+            const keyword = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+            setTrainingOutput(prev => [...prev, `Adding keyword: ${keyword}`]);
+            
+            // Create a File object from the file data
+            const audioFile = file.file || new File([file], file.name, {
+              type: file.type || 'audio/wav'
+            });
+            
+            await api.addKeyword(keyword, audioFile);
+            setTrainingOutput(prev => [...prev, `Successfully added keyword: ${keyword}`]);
+        }
 
-    // Simulate model metrics (replace with actual logic)
-    const simulatedMetrics = {
-      accuracy: 97.6,
-      loss: 0.18,
-      confusionMatrix: {
-        hello_google: { hello_google: 95, noise: 2, unknown: 3 },
-        noise: { hello_google: 1, noise: 98, unknown: 1 },
-        unknown: { hello_google: 0, noise: 3, unknown: 97 },
-      },
-      metrics: {
-        rocCurve: 0.98,
-        precision: 0.96,
-        recall: 0.95,
-        f1Score: 0.96,
-      },
-      performance: {
-        inferenceTime: '0.5ms',
-        ramUsage: '120MB',
-        flashUsage: '1.5MB',
-      },
-    };
+        // Get list of keywords
+        const { keywords } = await api.listKeywords();
+        setTrainingOutput(prev => [...prev, `Total keywords registered: ${keywords.length}`]);
 
-    setModelMetrics(simulatedMetrics);
+        // Store keywords in localStorage
+        localStorage.setItem('keywords', JSON.stringify(keywords));
 
-    // Simulate slight delay before showing popup
-    setTimeout(() => {
-      setIsTraining(false);
-      setIsTrainingCompleted(true); // Show success popup
-    }, 1500);
+        setIsTrainingCompleted(true);
+    } catch (error) {
+        setTrainingOutput(prev => [...prev, `Error: ${error.message}`]);
+    } finally {
+        setIsTraining(false);
+    }
   };
 
   const handleClosePopup = () => {
